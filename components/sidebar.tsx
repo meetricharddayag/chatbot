@@ -3,10 +3,8 @@
 import { useMemo, useState } from 'react'
 import {
   Bot,
-  CircleHelp,
   Command,
-  LifeBuoy,
-  Menu,
+  LogOut,
   MessageSquare,
   MoreHorizontal,
   Pencil,
@@ -48,6 +46,7 @@ export function Sidebar({
   onSelectConversation,
   onDeleteConversation,
   onRenameConversation,
+  onLogout,
 }: {
   open: boolean
   onClose: () => void
@@ -64,6 +63,7 @@ export function Sidebar({
   onSelectConversation: (conversation: Conversation) => void
   onDeleteConversation: (conversation: Conversation) => void
   onRenameConversation: (conversation: Conversation, name: string) => void
+  onLogout: () => void
 }) {
   const [query, setQuery] = useState('')
   const [menuFor, setMenuFor] = useState<string | null>(null)
@@ -243,16 +243,18 @@ export function Sidebar({
       </div>
 
       <div className="sidebar-bottom">
-        <a className="sidebar-link" href="https://docs.dify.ai/" target="_blank" rel="noreferrer">
+        {/* <a className="sidebar-link" href="https://docs.dify.ai/" target="_blank" rel="noreferrer">
           <CircleHelp size={16} /> Help center
         </a>
         <a className="sidebar-link" href="https://github.com/langgenius/dify" target="_blank" rel="noreferrer">
           <LifeBuoy size={16} /> Dify community
-        </a>
+        </a> */}
         <div className="account-row">
           <div className="account-avatar">Y</div>
           <span className="account-name">Your workspace</span>
-          <button className="account-menu" type="button" aria-label="Workspace menu"><Menu size={17} /></button>
+          <button className="account-menu" type="button" aria-label="Log out" title="Log out" onClick={onLogout}>
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

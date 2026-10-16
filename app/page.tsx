@@ -328,6 +328,16 @@ export default function ChatPage() {
     setMenuOpen(false)
   }
 
+  async function logout() {
+    try {
+      await fetch('/api/logout', { method: 'POST' })
+    }
+    catch {
+      // Ignore network errors; still reload below.
+    }
+    window.location.assign('/')
+  }
+
   async function deleteConversation(conversation: Conversation) {
     if (!selectedAppId)
       return
@@ -821,6 +831,7 @@ export default function ChatPage() {
         onSelectConversation={selectConversation}
         onDeleteConversation={conversation => void deleteConversation(conversation)}
         onRenameConversation={(conversation, name) => void renameConversation(conversation, name)}
+        onLogout={() => void logout()}
       />
 
       {menuOpen && <button className="mobile-overlay" aria-label="Close menu" onClick={() => setMenuOpen(false)} />}
