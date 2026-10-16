@@ -47,6 +47,8 @@ export function Sidebar({
   onDeleteConversation,
   onRenameConversation,
   onLogout,
+  userName,
+  userAvatarUrl,
 }: {
   open: boolean
   onClose: () => void
@@ -64,6 +66,8 @@ export function Sidebar({
   onDeleteConversation: (conversation: Conversation) => void
   onRenameConversation: (conversation: Conversation, name: string) => void
   onLogout: () => void
+  userName: string | null
+  userAvatarUrl: string | null
 }) {
   const [query, setQuery] = useState('')
   const [menuFor, setMenuFor] = useState<string | null>(null)
@@ -250,8 +254,10 @@ export function Sidebar({
           <LifeBuoy size={16} /> Dify community
         </a> */}
         <div className="account-row">
-          <div className="account-avatar">Y</div>
-          <span className="account-name">Your workspace</span>
+          {userAvatarUrl
+            ? <img className="account-avatar account-avatar-img" src={userAvatarUrl} alt={userName ?? 'User'} />
+            : <div className="account-avatar">{userName ? userName.charAt(0).toUpperCase() : 'Y'}</div>}
+          <span className="account-name">{userName ?? 'Your workspace'}</span>
           <button className="account-menu" type="button" aria-label="Log out" title="Log out" onClick={onLogout}>
             <LogOut size={16} />
           </button>

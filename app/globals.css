@@ -92,6 +92,7 @@ button { cursor: pointer; }
 .sidebar-link:hover { background: #ebeae6; color: #393a34; }
 .account-row { display: flex; align-items: center; gap: 9px; margin: 12px 0 0; padding: 13px 5px 0; border-top: 1px solid #e6e4de; }
 .account-avatar { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #e3d8bf; color: #695535; font-size: 11px; font-weight: 600; }
+.account-avatar-img { object-fit: cover; }
 .account-name { color: #66655e; font-size: 11px; }
 .account-menu { display: grid; width: 28px; height: 28px; margin-left: auto; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #88867e; }
 .account-menu:hover { background: #eae9e4; }

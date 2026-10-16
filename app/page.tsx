@@ -90,6 +90,7 @@ export default function ChatPage() {
   const [speakingId, setSpeakingId] = useState<string | null>(null)
   const [feedbackTarget, setFeedbackTarget] = useState<ChatMessage | null>(null)
   const [suggested, setSuggested] = useState<string[]>([])
+  const [account, setAccount] = useState<{ name: string; avatarUrl: string | null } | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -167,6 +168,31 @@ export default function ChatPage() {
     void loadApps()
     return () => controller.abort()
   }, [appRefresh])
+
+  // Load the signed-in user's profile
+  useEffect(() => {
+    const controller = new AbortController()
+    async function loadAccount() {
+      try {
+        const response = await fetch('/api/me', { signal: controller.signal, cache: 'no-store' })
+        if (!response.ok)
+          return
+        const payload: unknown = await response.json()
+        if (typeof payload === 'object' && payload !== null && 'name' in payload && typeof payload.name === 'string') {
+          setAccount({
+            name: payload.name,
+            avatarUrl: 'avatarUrl' in payload && typeof payload.avatarUrl === 'string' ? payload.avatarUrl : null,
+          })
+        }
+      }
+      catch {
+        // Ignore; the sidebar falls back to a generic label.
+      }
+    }
+
+    void loadAccount()
+    return () => controller.abort()
+  }, [])
 
   const loadConversations = useCallback(async (appId: string) => {
     setConversationsLoading(true)
@@ -832,6 +858,8 @@ export default function ChatPage() {
         onDeleteConversation={conversation => void deleteConversation(conversation)}
         onRenameConversation={(conversation, name) => void renameConversation(conversation, name)}
         onLogout={() => void logout()}
+        userName={account?.name ?? null}
+        userAvatarUrl={account?.avatarUrl ?? null}
       />
 
       {menuOpen && <button className="mobile-overlay" aria-label="Close menu" onClick={() => setMenuOpen(false)} />}
