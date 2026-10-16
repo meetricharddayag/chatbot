@@ -5,13 +5,6 @@ import type { InputFormField } from '@/lib/types'
 import { InputForm } from './input-form'
 import { Markdown } from './markdown'
 
-const defaultSuggestions = [
-  { icon: '✳', title: 'Get started', prompt: 'What can you help me with?' },
-  { icon: '⌘', title: 'Explore ideas', prompt: 'Help me brainstorm a few fresh ideas.' },
-  { icon: '↗', title: 'Write something', prompt: 'Help me write a clear, thoughtful message.' },
-  { icon: '◎', title: 'Learn a topic', prompt: 'Explain a complex topic in simple terms.' },
-]
-
 export function Welcome({
   appName,
   openingStatement,
@@ -31,9 +24,7 @@ export function Welcome({
   onPrompt: (prompt: string) => void
   disabled: boolean
 }) {
-  const prompts = suggestedQuestions.length > 0
-    ? suggestedQuestions.map(prompt => ({ icon: '✦', title: prompt, prompt }))
-    : defaultSuggestions
+  const prompts = suggestedQuestions.map(prompt => ({ icon: '✦', title: prompt, prompt }))
 
   return (
     <div className="welcome">
@@ -59,15 +50,17 @@ export function Welcome({
         <InputForm fields={inputFields} values={inputValues} onChange={onInputChange} />
       )}
 
-      <div className="suggestion-grid">
-        {prompts.map(item => (
-          <button key={item.title} className="suggestion-card" disabled={disabled} onClick={() => onPrompt(item.prompt)}>
-            <span className="suggestion-icon">{item.icon}</span>
-            <span className="suggestion-label">{item.title}</span>
-            <ArrowDown size={14} className="suggestion-arrow" />
-          </button>
-        ))}
-      </div>
+      {prompts.length > 0 && (
+        <div className="suggestion-grid">
+          {prompts.map(item => (
+            <button key={item.title} className="suggestion-card" disabled={disabled} onClick={() => onPrompt(item.prompt)}>
+              <span className="suggestion-icon">{item.icon}</span>
+              <span className="suggestion-label">{item.title}</span>
+              <ArrowDown size={14} className="suggestion-arrow" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

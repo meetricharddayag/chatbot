@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, Menu, Plus, Sparkles, X } from 'lucide-react'
+import { ChevronDown, Menu, Sparkles, X } from 'lucide-react'
 import type {
   AgentThought,
   AppParameters,
@@ -19,6 +19,7 @@ import { Sidebar } from '@/components/sidebar'
 import { Welcome } from '@/components/welcome'
 import { Composer } from '@/components/composer'
 import { ChatMessageItem } from '@/components/chat-message'
+import { FeedbackModal } from '@/components/feedback-modal'
 
 type DifyEvent = {
   event?: string
@@ -87,6 +88,7 @@ export default function ChatPage() {
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [speakingId, setSpeakingId] = useState<string | null>(null)
+  const [feedbackTarget, setFeedbackTarget] = useState<ChatMessage | null>(null)
   const [suggested, setSuggested] = useState<string[]>([])
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -662,16 +664,20 @@ export default function ChatPage() {
     window.setTimeout(() => setCopiedId(null), 1500)
   }
 
-  async function feedback(message: ChatMessage, rating: 'like' | 'dislike') {
+  async function postFeedback(message: ChatMessage, rating: 'like' | 'dislike' | null, content?: string) {
     if (!message.messageId || !selectedAppId)
       return
-    const next = message.feedback?.rating === rating ? null : rating
-    setMessages(current => current.map(item => item.id === message.id ? { ...item, feedback: { rating: next } } : item))
+    setMessages(current => current.map(item => item.id === message.id ? { ...item, feedback: { rating } } : item))
     try {
       const response = await fetch(`/api/messages/${encodeURIComponent(message.messageId)}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app_id: selectedAppId, user: getUserId(), rating: next }),
+        body: JSON.stringify({
+          app_id: selectedAppId,
+          user: getUserId(),
+          rating,
+          ...(content ? { content } : {}),
+        }),
       })
       if (!response.ok)
         throw new Error(readErrorMessage(await response.text(), 'Could not save feedback.'))
@@ -679,6 +685,22 @@ export default function ChatPage() {
     catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not save feedback.')
     }
+  }
+
+  function feedback(message: ChatMessage, rating: 'like' | 'dislike') {
+    if (rating === 'dislike') {
+      setFeedbackTarget(message)
+      return
+    }
+    const next = message.feedback?.rating === 'like' ? null : 'like'
+    void postFeedback(message, next)
+  }
+
+  function submitDislikeFeedback(content: string) {
+    if (!feedbackTarget)
+      return
+    void postFeedback(feedbackTarget, 'dislike', content)
+    setFeedbackTarget(null)
   }
 
   async function speak(message: ChatMessage) {
@@ -820,10 +842,6 @@ export default function ChatPage() {
               </span>
             </div>
           </div>
-          <div className="topbar-right">
-            <span className="powered-by">Powered by <strong>Dify</strong></span>
-            <button type="button" className="topbar-new-chat" onClick={newChat}><Plus size={15} /> New chat</button>
-          </div>
         </header>
 
         <div className="conversation-area">
@@ -897,6 +915,14 @@ export default function ChatPage() {
           </div>
         </div>
       </section>
+
+      {feedbackTarget && (
+        <FeedbackModal
+          key={feedbackTarget.id}
+          onClose={() => setFeedbackTarget(null)}
+          onSubmit={content => submitDislikeFeedback(content)}
+        />
+      )}
     </main>
   )
 }
